@@ -4,7 +4,7 @@ var langList = require('../lang');
 var request = require('request-promise');
 
 exports.get_all_problem = function(req, res) {
-    Problem.find({avail: true}, {_id: 0, pid: 1, name: 1, difficulty: 1, solved: 1, tags: 1}, function(err,problem) {
+    Problem.find({ avail: true }, { _id: 0, pid: 1, name: 1, difficulty: 1, solved: 1, tags: 1 }, function(err, problem) {
         if (err) {
             console.log(err);
         }
@@ -15,7 +15,7 @@ exports.get_all_problem = function(req, res) {
 exports.post_submit_custom = function(req, res) {
     var options = {
         method: 'POST',
-        uri: 'https://api.judge0.com/submissions/?base64_encoded=false&wait=true',
+        uri: 'http://192.168.1.103:2358/submissions/?base64_encoded=false&wait=true',
         body: {
             "source_code": req.body.sourcecode,
             "language_id": parseInt(req.body.lang),
@@ -34,7 +34,7 @@ exports.post_submit_custom = function(req, res) {
 };
 
 exports.get_submission = function(req, res) {
-    Submission.findOne({_id: req.params.sid}, {'__v': 0}, function(err, sub_res) {
+    Submission.findOne({ _id: req.params.sid }, { '__v': 0 }, function(err, sub_res) {
         if (sub_res) {
             res.json(sub_res);
         } else {
