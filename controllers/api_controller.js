@@ -15,7 +15,7 @@ exports.get_all_problem = function(req, res) {
 exports.post_submit_custom = function(req, res) {
     var options = {
         method: 'POST',
-        uri: 'hhttp://192.168.1.249:2358/submissions/?base64_encoded=false&wait=true',
+        uri: 'http://192.168.1.249:2358/submissions/?base64_encoded=false&wait=true',
         body: {
             "source_code": req.body.sourcecode,
             "language_id": parseInt(req.body.lang),

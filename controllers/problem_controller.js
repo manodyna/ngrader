@@ -106,7 +106,7 @@ exports.post_submission = function(req, res, next) {
                 username: req.user ? req.user.username : 'Guest',
                 sourcecode: sourcecode,
                 submit_time: new Date(),
-                in_queue: true
+                // in_queue: true
             });
             new_submission.save(function(err, submission) {
                 if (err) console.log(err);

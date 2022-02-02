@@ -3,3 +3,10 @@
 int main(){
     printf("1");
 }
+
+
+class m(){
+  public static void main(String[]args){
+    System.out.printlin("1");
+  }
+}
