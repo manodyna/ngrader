@@ -6,22 +6,23 @@ exports.fb_login = function(req, res) {
 };
 
 exports.fb_login_cb = function(req, res) {
-    passport.authenticate('facebook', { 
+    passport.authenticate('facebook', {
         successRedirect: '/problems',
-        failureRedirect: '/' 
+        failureRedirect: '/'
     });
 };
 
 exports.post_register = function(req, res) {
-    var acc = new Account({ 
-        username : req.body.username, 
-        email: req.body.email, 
-        permission: "user"});
+    var acc = new Account({
+        username: req.body.username,
+        email: req.body.email,
+        permission: "user"
+    });
     Account.register(acc, req.body.password, function(err, user) {
         if (err) {
-            return res.render('register', { user : user });
+            return res.render('register', { user: user });
         }
-        passport.authenticate('local')(req, res, function () {
+        passport.authenticate('local')(req, res, function() {
             res.redirect('/');
         });
     })
@@ -29,23 +30,23 @@ exports.post_register = function(req, res) {
 
 exports.get_login = function(req, res) {
     if (req.user) {
-        res.render('login', {message: "You have already logged in."});
+        res.render('login', { message: "You have already logged in." });
     } else {
-        res.render('login', {message: null});
+        res.render('login', { message: null });
     }
 };
 
 exports.post_login = function(req, res) {
     passport.authenticate('local', function(err, user, info) {
-        if (err) { 
+        if (err) {
             return;
         }
         if (!user) {
-            return res.render('login', {message: "Wrong username or password."});
+            return res.render('login', { message: "Wrong username or password." });
         }
         req.logIn(user, function(err) {
             if (err) {
-                return res.render('login', {message: "Wrong username or password."});
+                return res.render('login', { message: "Wrong username or password." });
             } else {
                 return res.redirect('/');
             }

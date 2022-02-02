@@ -88,7 +88,7 @@ exports.post_submission = function(req, res, next) {
             for (var i = 0; i < test_res.cases.length; i++) {
                 options.push({
                     method: 'POST',
-                    uri: 'hhttp://192.168.1.103:2358/submissions/?base64_encoded=false',
+                    uri: 'http://192.168.1.249:2358/submissions/?base64_encoded=false',
                     body: {
                         "source_code": sourcecode,
                         "language_id": parseInt(req.body.lang),
@@ -115,7 +115,7 @@ exports.post_submission = function(req, res, next) {
                 const getTokens = options.map(opt => request(opt).then(res => res.token));
                 Promise.all(getTokens).then(tokens => {
                     setTimeout(() => {
-                        Promise.all(tokens.map(token => request(`http://192.168.1.103:2358/submissions/${token}`).then(res => JSON.parse(res))))
+                        Promise.all(tokens.map(token => request('http://192.168.1.249:2358/submissions/${token}').then(res => JSON.parse(res))))
                             .then(data => {
                                 get_result(data, sourcecode, submission.id)
                             })
@@ -176,7 +176,7 @@ exports.post_submission_live_editor = function(req, res, next) {
         for (var i = 0; i < test_res.cases.length; i++) {
             options.push({
                 method: 'POST',
-                uri: 'http://192.168.1.103:2358/submissions/?base64_encoded=false',
+                uri: 'http://192.168.1.249:2358/submissions/?base64_encoded=false',
                 body: {
                     "source_code": req.body.sourcecode,
                     "language_id": parseInt(req.body.lang),
@@ -203,7 +203,7 @@ exports.post_submission_live_editor = function(req, res, next) {
             const getTokens = options.map(opt => request(opt).then(res => res.token));
             Promise.all(getTokens).then(tokens => {
                 setTimeout(() => {
-                    Promise.all(tokens.map(token => request(`http://192.168.1.103:2358/submissions/${token}`).then(res => JSON.parse(res))))
+                    Promise.all(tokens.map(token => request('http://192.168.1.249:2358/submissions/${token}').then(res => JSON.parse(res))))
                         .then(data => {
                             get_result(data, req.body.sourcecode, submission.id)
                         })
@@ -220,7 +220,7 @@ exports.get_custom_test = function(req, res) {
 exports.post_custom_test_live = function(req, res) {
     var options = {
         method: 'POST',
-        uri: 'http://192.168.1.103:2358/submissions/?base64_encoded=false&wait=true',
+        uri: 'http://192.168.1.249:2358/submissions/?base64_encoded=false&wait=true',
         body: {
             "source_code": req.body.sourcecode,
             "language_id": parseInt(req.body.lang),
