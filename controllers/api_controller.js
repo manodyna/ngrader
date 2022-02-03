@@ -21,17 +21,19 @@ exports.post_submit_custom = function(req, res) {
             "language_id": parseInt(req.body.lang),
             "stdin": req.body.input
         },
-        proxy: 'http://localhost:8080',
         json: true
     };
-    request(options, function(err, result, body) {
-        res.json({
-            stdout: body.stdout,
-            time: body.time,
-            memory: body.memory,
-            stderr: body.stderr
-        })
-    });
+
+
+
+    // request(options, function(err, result, body) {
+    //     res.json({
+    //         stdout: body.stdout,
+    //         time: body.time,
+    //         memory: body.memory,
+    //         stderr: body.stderr
+    //     })
+    // });
 };
 
 exports.get_submission = function(req, res) {
