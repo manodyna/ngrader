@@ -6,6 +6,7 @@ var Testcase = require('../models/testcase');
 var Submission = require('../models/submission');
 var Announcement = require('../models/announcement');
 
+// works
 exports.get_all_problem = function(req, res) {
     Problem.find({ avail: true }, function(err, problem) {
         if (err) {
@@ -18,12 +19,14 @@ exports.get_all_problem = function(req, res) {
     })
 };
 
+//works
 exports.get_problem_list = function(req, res) {
     Announcement.find({}, function(err, an_res) {
         res.render('problemlist', { user: req.user, announcement: an_res });
     })
 };
 
+//works
 exports.get_all_problem_with_tag = function(req, res) {
     Problem.find({ avail: true, tags: req.params.tag.replace('_', ' ') }, function(err, problem) {
         if (err) {
@@ -33,6 +36,7 @@ exports.get_all_problem_with_tag = function(req, res) {
     });
 };
 
+//works
 exports.get_all_problem_with_diff = function(req, res) {
     Problem.find({ avail: true, difficulty: parseInt(req.params.diff) }, function(err, problem) {
         if (err) {
@@ -42,6 +46,7 @@ exports.get_all_problem_with_diff = function(req, res) {
     });
 };
 
+//works
 exports.get_problem = function(req, res) {
     Problem.findOne({ avail: true, pid: req.params.pid }, function(err, prob_res) {
         if (err) return console.log(err);
@@ -52,6 +57,7 @@ exports.get_problem = function(req, res) {
     });
 };
 
+//works inconsistently
 exports.post_submission = function(req, res, next) {
     var get_result = function(data, sourcecode, submission_id) {
         var result = '',
@@ -97,7 +103,7 @@ exports.post_submission = function(req, res, next) {
                         "cpu_time_limit": test_res.time_limit,
                         "memory_limit": test_res.memory_limit * 1000
                     },
-                    proxy: 'http://localhost:8080',
+                    // proxy: 'http://localhost:8080',
                     json: true
                 });
             }
@@ -127,6 +133,7 @@ exports.post_submission = function(req, res, next) {
     });
 };
 
+//does not work
 exports.post_submission_live_editor = function(req, res, next) {
     var get_result = function(data, sourcecode, submission_id) {
         var result = '',
@@ -186,7 +193,7 @@ exports.post_submission_live_editor = function(req, res, next) {
                     "cpu_time_limit": test_res.time_limit,
                     "memory_limit": test_res.memory_limit * 1000
                 },
-                proxy: 'http://localhost:8080',
+                // proxy: 'http://localhost:8080',
                 json: true
             });
         }
@@ -229,7 +236,7 @@ exports.post_custom_test_live = function(req, res) {
             "language_id": parseInt(req.body.lang),
             "stdin": req.body.input
         },
-        proxy: 'http://localhost:8080',
+        // proxy: 'http://localhost:8080',
         json: true
     };
     request(options, function(err, result, body) {
