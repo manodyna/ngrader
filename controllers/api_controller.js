@@ -21,6 +21,7 @@ exports.post_submit_custom = function(req, res) {
             "language_id": parseInt(req.body.lang),
             "stdin": req.body.input
         },
+        proxy: 'http://localhost:8080',
         json: true
     };
     request(options, function(err, result, body) {
