@@ -1,4 +1,4 @@
-var lang = require('../lang');
+var lang = require('../lang.json');
 var Problem = require('../models/problem');
 var Testcase = require('../models/testcase');
 var Submission = require('../models/submission');
