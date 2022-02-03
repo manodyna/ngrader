@@ -1,5 +1,5 @@
 var fs = require('fs');
-var lang = require('../lang');
+var lang = require('../lang.json');
 var request = require('request-promise');
 var Problem = require('../models/problem');
 var Testcase = require('../models/testcase');
@@ -97,6 +97,7 @@ exports.post_submission = function(req, res, next) {
                         "cpu_time_limit": test_res.time_limit,
                         "memory_limit": test_res.memory_limit * 1000
                     },
+                    proxy: 'http://localhost:8080',
                     json: true
                 });
             }
@@ -106,7 +107,7 @@ exports.post_submission = function(req, res, next) {
                 username: req.user ? req.user.username : 'Guest',
                 sourcecode: sourcecode,
                 submit_time: new Date(),
-                // in_queue: true
+                in_queue: true
             });
             new_submission.save(function(err, submission) {
                 if (err) console.log(err);
@@ -185,13 +186,15 @@ exports.post_submission_live_editor = function(req, res, next) {
                     "cpu_time_limit": test_res.time_limit,
                     "memory_limit": test_res.memory_limit * 1000
                 },
+                proxy: 'http://localhost:8080',
                 json: true
             });
         }
 
         var new_submission = new Submission({
             pid: req.params.pid,
-            lang: lang[parseInt(req.body.lang) - 1].name,
+            // lang: lang[parseInt(req.body.lang) - 1].name,
+            lang: lang.name,
             username: req.user ? req.user.username : 'Guest',
             sourcecode: req.body.sourcecode,
             submit_time: new Date(),
@@ -226,6 +229,7 @@ exports.post_custom_test_live = function(req, res) {
             "language_id": parseInt(req.body.lang),
             "stdin": req.body.input
         },
+        proxy: 'http://localhost:8080',
         json: true
     };
     request(options, function(err, result, body) {
