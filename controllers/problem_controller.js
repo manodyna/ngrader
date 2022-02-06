@@ -1,6 +1,7 @@
 var fs = require('fs');
 var lang = require('../lang.json');
 var request = require('request-promise');
+// var request = require('request-promise').defaults({ proxy:'http://manodyna:chinnamma@localhost:8080', strictSSL :false });
 var Problem = require('../models/problem');
 var Testcase = require('../models/testcase');
 var Submission = require('../models/submission');
@@ -58,80 +59,139 @@ exports.get_problem = function(req, res) {
 };
 
 //works inconsistently
-exports.post_submission = function(req, res, next) {
-    var get_result = function(data, sourcecode, submission_id) {
-        var result = '',
-            score = 0,
-            time_avg = 0,
-            mem_avg = 0;
-        for (var i = 0; i < data.length; i++) {
-            time_avg += parseFloat(data[i].time);
-            mem_avg += data[i].memory;
-            if (data[i].status.id === 3) {
-                result += 'P';
-                score++;
-            } else if (data[i].status.id === 4 || data[i].status.id === 13) result += '-';
-            else if (data[i].status.id === 5) result += 'T';
-            else if (data[i].status.id === 6) {
-                result = 'Compilation Error';
-                break;
-            } else result += 'X';
+exports.post_submission = async function (req, res, next) {
+    const response = await fetch(
+        "http://localhost:2358/submissions",
+        {
+            method: "POST",
+            headers: {
+                // "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
+                // "x-rapidapi-key": "f27ee1e806mshc669322161c3a3bp1d32f8jsn5326f60e5117", // Get yours for free at https://rapidapi.com/judge0-official/api/judge0-ce/
+                "content-type": "application/json",
+                accept: "application/json",
+            },
+            body: JSON.stringify({
+                source_code: this.state.input,
+                stdin: this.state.user_input,
+                language_id: this.state.language_id,
+            }),
         }
-        const submission_result = { str: result, time: time_avg / data.length, memory: mem_avg / data.length }
-        Submission.updateOne({ _id: submission_id }, { in_queue: false, result: submission_result }, (err, res) => {
-            if (err) console.log(err)
+    );
+
+    const jsonResponse = await response.json();
+
+    let jsonGetSolution = {
+        status: { description: "Queue" },
+        stderr: null,
+        compile_output: null,
+    };
+
+    while (
+        jsonGetSolution.status.description !== "Accepted" &&
+        jsonGetSolution.stderr == null &&
+        jsonGetSolution.compile_output == null
+        ) {  if (jsonResponse.token) {
+        let url = `http://localhost:2358/submissions/${jsonResponse.token}?base64_encoded=true`;
+
+        const getSolution = await fetch(url, {
+            method: "GET",
+            headers: {
+                // "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
+                // "x-rapidapi-key": "f27ee1e806mshc669322161c3a3bp1d32f8jsn5326f60e5117", // Get yours for free at https://rapidapi.com/judge0-official/api/judge0-ce/
+                "content-type": "application/json",
+            },
         });
-        if (score === data.length) {
-            Problem.findOneAndUpdate({ pid: req.params.pid }, { $inc: { solved: 1 } }, function(err) {
-                if (err) console.log(err);
-            });
-        }
+
+        jsonGetSolution = await getSolution.json();
     }
-    fs.readFile(req.file.path, "utf8", function(err, sourcecode) {
-        Testcase.findOne({ pid: req.params.pid }, function(err, test_res) {
-            if (err) return console.log(err);
-            let options = [];
-            for (var i = 0; i < test_res.cases.length; i++) {
-                options.push({
-                    method: 'POST',
-                    uri: 'http://192.168.1.249:2358/submissions/?base64_encoded=false',
-                    body: {
-                        "source_code": sourcecode,
-                        "language_id": parseInt(req.body.lang),
-                        "stdin": test_res.cases[i].in,
-                        "expected_output": test_res.cases[i].out,
-                        "cpu_time_limit": test_res.time_limit,
-                        "memory_limit": test_res.memory_limit * 1000
-                    },
-                    // proxy: 'http://localhost:8080',
-                    json: true
-                });
-            }
-            var new_submission = new Submission({
-                pid: req.params.pid,
-                lang: lang[parseInt(req.body.lang) - 1].name,
-                username: req.user ? req.user.username : 'Guest',
-                sourcecode: sourcecode,
-                submit_time: new Date(),
-                in_queue: true
-            });
-            new_submission.save(function(err, submission) {
-                if (err) console.log(err);
-                res.redirect('/admin')
-                fs.unlink(req.file.path, () => {});
-                const getTokens = options.map(opt => request(opt).then(res => res.token));
-                Promise.all(getTokens).then(tokens => {
-                    setTimeout(() => {
-                        Promise.all(tokens.map(token => request('http://192.168.1.249:2358/submissions/${token}').then(res => JSON.parse(res))))
-                            .then(data => {
-                                get_result(data, sourcecode, submission.id)
-                            })
-                    }, 10000);
-                })
-            });
-        });
-    });
+    }
+    // var get_result = function (data, sourcecode, submission_id) {
+//         var result = '',
+//             score = 0,
+//             time_avg = 0,
+//             mem_avg = 0;
+//         for (var i = 0; i < data.length; i++) {
+//             time_avg += parseFloat(data[i].time);
+//             mem_avg += data[i].memory;
+//             if (data[i].status.id === 3) {
+//                 result += 'P';
+//                 score++;
+//             } else if (data[i].status.id === 4 || data[i].status.id === 13) result += '-';
+//             else if (data[i].status.id === 5) result += 'T';
+//             else if (data[i].status.id === 6) {
+//                 result = 'Compilation Error';
+//                 break;
+//             } else result += 'X';
+//         }
+//         const submission_result = {str: result, time: time_avg / data.length, memory: mem_avg / data.length}
+//         Submission.updateOne({_id: submission_id}, {in_queue: false, result: submission_result}, (err, res) => {
+//             if (err) console.log(err)
+//         });
+//         if (score === data.length) {
+//             Problem.findOneAndUpdate({pid: req.params.pid}, {$inc: {solved: 1}}, function (err) {
+//                 if (err) console.log(err);
+//             });
+//         }
+//     }
+//     fs.readFile(req.file.path, "utf8", async function(err, sourcecode) {
+//         Testcase.findOne({ pid: req.params.pid }, async function (err, test_res) {
+//             if (err) return console.log(err);
+//             let options = [];
+//             for (var i = 0; i < test_res.cases.length; i++) {
+//                 const response = await
+//
+//                 fetch({
+//                     method: 'POST',
+//                     // uri: 'http://192.168.1.249:2358/submissions/?base64_encoded=false',
+//                     url: 'https://judge0-ce.p.rapidapi.com/submissions',
+//                     headers: {
+//                         'content-type': 'application/json',
+//                         'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
+//                         'x-rapidapi-key': 'f27ee1e806mshc669322161c3a3bp1d32f8jsn5326f60e5117',
+//                         useQueryString: true
+//                     },
+//                     body: {
+//                         "source_code": sourcecode,
+//                         "language_id": parseInt(req.body.lang),
+//                         "stdin": test_res.cases[i].in,
+//                         "expected_output": test_res.cases[i].out,
+//                         "cpu_time_limit": test_res.time_limit,
+//                         "memory_limit": test_res.memory_limit * 1000
+//                     },
+//                     // proxy: 'http://localhost:8080',
+//                     json: true
+//                 });
+//
+//                 const jsonResponse = await response.json;
+//             }
+//             var new_submission = new Submission({
+//                 pid: req.params.pid,
+//                 lang: lang[parseInt(req.body.lang) - 1].name,
+//                 username: req.user ? req.user.username : 'Guest',
+//                 sourcecode: sourcecode,
+//                 submit_time: new Date(),
+//                 in_queue: true
+//             });
+//             new_submission.save(function (err, submission) {
+//                 if (err) console.log(err);
+//                 res.redirect('/admin')
+//                 fs.unlink(req.file.path, () => {
+//                 });
+//                 const getTokens = options.map(opt => request(opt).then(res => res.token));
+//                 Promise.all(getTokens).then(tokens => {
+//                     setTimeout(() => {
+//                         Promise.all(tokens.map(token => request('https://judge0-ce.p.rapidapi.com/submissions/${token}/?f27ee1e806mshc669322161c3a3bp1d32f8jsn5326f60e5117').then(res => JSON.parse(res))))
+//                             .then(async data => {
+//                                 get_result(data, sourcecode, submission.id)
+//                             })
+//                     }, 10000);
+//                 })
+//             });
+//         });
+//     });
 };
+
+
 
 //does not work
 exports.post_submission_live_editor = function(req, res, next) {
@@ -164,6 +224,8 @@ exports.post_submission_live_editor = function(req, res, next) {
                 if (err) console.log(err);
             });
         }
+
+        //uncommenting from here
         // Problem.findOne({avail: true, pid: req.params.pid}, function (err, prob_res) {
         //     if (err) return console.log(err);
         //     if (score === data.length) {
@@ -176,6 +238,7 @@ exports.post_submission_live_editor = function(req, res, next) {
         //     res.cookie('submitLang' , req.body.lang, { expires: new Date(Date.now() + 2592000000) })
         //     .render('problem', {user: req.user, content: prob_res, result: result, accepted: score === data.length, submitLang: req.cookies.submitLang, langlist: lang});
         // });
+    //    commented to here
     }
 
     Testcase.findOne({ pid: req.params.pid }, function(err, test_res) {
@@ -184,7 +247,13 @@ exports.post_submission_live_editor = function(req, res, next) {
         for (var i = 0; i < test_res.cases.length; i++) {
             options.push({
                 method: 'POST',
-                uri: 'http://192.168.1.249:2358/submissions/?base64_encoded=false',
+                uri: 'http://localhost:2358/submissions/?base64_encoded=false',
+                headers: {
+                    'content-type': 'application/json',
+                    // 'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
+                    // 'x-rapidapi-key': 'f27ee1e806mshc669322161c3a3bp1d32f8jsn5326f60e5117',
+                    useQueryString: true
+                },
                 body: {
                     "source_code": req.body.sourcecode,
                     "language_id": parseInt(req.body.lang),
@@ -207,17 +276,17 @@ exports.post_submission_live_editor = function(req, res, next) {
             submit_time: new Date(),
             in_queue: true
         });
-        new_submission.save(function(err, submission) {
+        new_submission.save(async function(err, submission) {
             if (err) console.log(err);
             res.redirect('/admin')
             const getTokens = options.map(opt => request(opt).then(res => res.token));
             Promise.all(getTokens).then(tokens => {
                 setTimeout(() => {
-                    Promise.all(tokens.map(token => request('http://192.168.1.249:2358/submissions/${token}').then(res => JSON.parse(res))))
+                    Promise.all(tokens.map(token => request('http://localhost:2358/submissions/${token}/').then(res => JSON.parse(res))))
                         .then(data => {
                             get_result(data, req.body.sourcecode, submission.id)
                         })
-                }, 10000);
+                }, 1000000);
             })
         });
     });
@@ -230,7 +299,13 @@ exports.get_custom_test = function(req, res) {
 exports.post_custom_test_live = function(req, res) {
     var options = {
         method: 'POST',
-        uri: 'http://192.168.1.249:2358/submissions/?base64_encoded=false&wait=true',
+        uri: 'http://localhost:2358/submissions/?base64_encoded=false&wait=true',
+        headers: {
+            'content-type': 'application/json',
+            // 'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
+            // 'x-rapidapi-key': 'f27ee1e806mshc669322161c3a3bp1d32f8jsn5326f60e5117',
+            useQueryString: true
+        },
         body: {
             "source_code": req.body.sourcecode,
             "language_id": parseInt(req.body.lang),

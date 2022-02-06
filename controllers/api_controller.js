@@ -12,10 +12,17 @@ exports.get_all_problem = function(req, res) {
     });
 };
 
-exports.post_submit_custom = function(req, res) {
-    var options = {
+//async-await added
+exports.post_submit_custom = async function(req, res) {
+    const options = {
         method: 'POST',
-        uri: 'http://192.168.1.249:2358/submissions/?base64_encoded=false&wait=true',
+        uri: 'http://localhost:2358/submissions/?base64_encoded=false&wait=true',
+        headers: {
+            'content-type': 'application/json',
+            // 'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
+            // 'x-rapidapi-key': 'f27ee1e806mshc669322161c3a3bp1d32f8jsn5326f60e5117',
+            useQueryString: true
+        },
         body: {
             "source_code": req.body.sourcecode,
             "language_id": parseInt(req.body.lang),
@@ -24,19 +31,17 @@ exports.post_submit_custom = function(req, res) {
         json: true
     };
 
-
-
-    // request(options, function(err, result, body) {
-    //     res.json({
-    //         stdout: body.stdout,
-    //         time: body.time,
-    //         memory: body.memory,
-    //         stderr: body.stderr
-    //     })
-    // });
+    await request(options, function(err, result, body) {
+        res.json({
+            stdout: body.stdout,
+            time: body.time,
+            memory: body.memory,
+            stderr: body.stderr
+        })
+    });
 };
 
-exports.get_submission = function(req, res) {
+exports.get_submission = async function(req, res) {
     Submission.findOne({ _id: req.params.sid }, { '__v': 0 }, function(err, sub_res) {
         if (sub_res) {
             res.json(sub_res);

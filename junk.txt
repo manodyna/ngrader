@@ -1,12 +1,16 @@
 #include<stdio.h>
 
 int main(){
-    printf("1");
+    int a;
+    scanf("%d", &a);
+    printf("%d", a);
 }
 
 
-class m(){
+class Main(){
   public static void main(String[]args){
     System.out.printlin("1");
   }
 }
+
+console.log("1")
