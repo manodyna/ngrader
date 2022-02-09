@@ -58,23 +58,24 @@ exports.get_problem = function(req, res) {
     });
 };
 
-//works inconsistently
+//custom works
 exports.post_submission = async function (req, res, next) {
     const response = await fetch(
-        "http://localhost:2358/submissions",
+        "https://judge0-ce.p.rapidapi.com/submissions",
         {
             method: "POST",
             headers: {
-                // "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
-                // "x-rapidapi-key": "f27ee1e806mshc669322161c3a3bp1d32f8jsn5326f60e5117", // Get yours for free at https://rapidapi.com/judge0-official/api/judge0-ce/
+                "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
+                "x-rapidapi-key": "f27ee1e806mshc669322161c3a3bp1d32f8jsn5326f60e5117", // Get yours for free at https://rapidapi.com/judge0-official/api/judge0-ce/
                 "content-type": "application/json",
                 accept: "application/json",
             },
-            body: JSON.stringify({
-                source_code: this.state.input,
-                stdin: this.state.user_input,
-                language_id: this.state.language_id,
-            }),
+            body: {
+                "source_code": req.body.sourcecode,
+                "language_id": parseInt(req.body.lang),
+                "stdin": req.body.input
+            },
+            json:true
         }
     );
 
@@ -91,20 +92,20 @@ exports.post_submission = async function (req, res, next) {
         jsonGetSolution.stderr == null &&
         jsonGetSolution.compile_output == null
         ) {  if (jsonResponse.token) {
-        let url = `http://localhost:2358/submissions/${jsonResponse.token}?base64_encoded=true`;
+        let url = `https://judge0-ce.p.rapidapi.com/submissions/${jsonResponse.token}?base64_encoded=true`;
 
         const getSolution = await fetch(url, {
             method: "GET",
             headers: {
-                // "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
-                // "x-rapidapi-key": "f27ee1e806mshc669322161c3a3bp1d32f8jsn5326f60e5117", // Get yours for free at https://rapidapi.com/judge0-official/api/judge0-ce/
+                "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
+                "x-rapidapi-key": "f27ee1e806mshc669322161c3a3bp1d32f8jsn5326f60e5117", // Get yours for free at https://rapidapi.com/judge0-official/api/judge0-ce/
                 "content-type": "application/json",
             },
         });
 
         jsonGetSolution = await getSolution.json();
     }
-    }
+}
     // var get_result = function (data, sourcecode, submission_id) {
 //         var result = '',
 //             score = 0,
@@ -247,11 +248,11 @@ exports.post_submission_live_editor = function(req, res, next) {
         for (var i = 0; i < test_res.cases.length; i++) {
             options.push({
                 method: 'POST',
-                uri: 'http://localhost:2358/submissions/?base64_encoded=false',
+                uri: 'https://judge0-ce.p.rapidapi.com/submissions/?base64_encoded=false',
                 headers: {
                     'content-type': 'application/json',
-                    // 'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
-                    // 'x-rapidapi-key': 'f27ee1e806mshc669322161c3a3bp1d32f8jsn5326f60e5117',
+                    'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
+                    'x-rapidapi-key': 'f27ee1e806mshc669322161c3a3bp1d32f8jsn5326f60e5117',
                     useQueryString: true
                 },
                 body: {
@@ -282,7 +283,7 @@ exports.post_submission_live_editor = function(req, res, next) {
             const getTokens = options.map(opt => request(opt).then(res => res.token));
             Promise.all(getTokens).then(tokens => {
                 setTimeout(() => {
-                    Promise.all(tokens.map(token => request('http://localhost:2358/submissions/${token}/').then(res => JSON.parse(res))))
+                    Promise.all(tokens.map(token => request('https://judge0-ce.p.rapidapi.com/submissions/${token}/?f27ee1e806mshc669322161c3a3bp1d32f8jsn5326f60e5117').then(res => JSON.parse(res))))
                         .then(data => {
                             get_result(data, req.body.sourcecode, submission.id)
                         })
@@ -299,11 +300,11 @@ exports.get_custom_test = function(req, res) {
 exports.post_custom_test_live = function(req, res) {
     var options = {
         method: 'POST',
-        uri: 'http://localhost:2358/submissions/?base64_encoded=false&wait=true',
+        uri: 'https://judge0-ce.p.rapidapi.com/submissions/?base64_encoded=false&wait=true',
         headers: {
-            'content-type': 'application/json',
-            // 'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
-            // 'x-rapidapi-key': 'f27ee1e806mshc669322161c3a3bp1d32f8jsn5326f60e5117',
+             'content-type': 'application/json',
+            'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
+            'x-rapidapi-key': 'f27ee1e806mshc669322161c3a3bp1d32f8jsn5326f60e5117',
             useQueryString: true
         },
         body: {

@@ -9,7 +9,7 @@ int main(){
 
 class Main(){
   public static void main(String[]args){
-    System.out.printlin("1");
+    System.out.println("1");
   }
 }
 

@@ -16,11 +16,11 @@ exports.get_all_problem = function(req, res) {
 exports.post_submit_custom = async function(req, res) {
     const options = {
         method: 'POST',
-        uri: 'http://localhost:2358/submissions/?base64_encoded=false&wait=true',
+        uri: 'https://judge0-ce.p.rapidapi.com/submissions/?base64_encoded=false&wait=true',
         headers: {
             'content-type': 'application/json',
-            // 'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
-            // 'x-rapidapi-key': 'f27ee1e806mshc669322161c3a3bp1d32f8jsn5326f60e5117',
+            'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
+            'x-rapidapi-key': 'f27ee1e806mshc669322161c3a3bp1d32f8jsn5326f60e5117',
             useQueryString: true
         },
         body: {
