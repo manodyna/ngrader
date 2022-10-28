@@ -1,7 +1,7 @@
 var fs = require('fs');
 var lang = require('../lang.json');
 var request = require('request-promise');
-// var request = require('request-promise').defaults({ proxy:'http://manodyna:chinnamma@localhost:8080', strictSSL :false });
+// var request = require('request-promise').defaults({ proxy:'proxy', strictSSL :false });
 var Problem = require('../models/problem');
 var Testcase = require('../models/testcase');
 var Submission = require('../models/submission');
